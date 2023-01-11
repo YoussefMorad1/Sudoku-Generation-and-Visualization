@@ -1,0 +1,9 @@
+# Suduko Unique Puzzle Creator with Pygame
+
+* This is a GUI Program that uses BackTracking Algorithm to Create a unique (only one solution) Suduko Puzzle 
+* The Program has an option to solve the puzzle after it's created
+* The Program shows visual steps while creating the unique puzzle and while solving
+* Creating the puzzle may take a long time that's why the program allows user to choose between 2 mod:
+    * Stop Watch Mode: NO time limits -> the program will take his time creating the puzzle and trying to have as few clues as he can
+    * Timer Mode: time limits -> the user chooses a number of secs and the program stops after this timer (might have more clues)
+    
