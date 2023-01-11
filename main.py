@@ -133,13 +133,33 @@ class Board:
             return False
 
         for j in range(self.__size):
-            if value == self.__board[row][j] or value == self.__board[j][col]:
+            if (value == self.__board[row][j]) or (value == self.__board[j][col]):
                 return False
 
         cur_square_row, cur_square_col = 3 * int(row / 3), 3 * int(col / 3)
         for i in range(cur_square_row, cur_square_row + 3):
             for j in range(cur_square_col, cur_square_col + 3):
                 if value == self.__board[i][j]:
+                    return False
+
+        return True
+
+    def is_valid_move_2(self, row, col, value, vis):
+        # Checks if this move is valid -> Check valid rows and column,
+        # Check is the value found in the square? or is it found in the current row or column
+
+        if row < 0 | col < 0 | row >= self.__size | col >= self.__size:
+            return False
+
+
+        for j in range(self.__size):
+            if (value == self.__board[row][j] and vis[row][j] and j != col) or (value == self.__board[j][col] and vis[j][col] and j != row):
+                return False
+
+        cur_square_row, cur_square_col = 3 * int(row / 3), 3 * int(col / 3)
+        for i in range(cur_square_row, cur_square_row + 3):
+            for j in range(cur_square_col, cur_square_col + 3):
+                if value == self.__board[i][j] and (row != i or j != col) and vis[i][j]:
                     return False
 
         return True
@@ -232,6 +252,7 @@ class GUI_Manager:
 
         # Initialize with modules
         pygame.init()
+        pygame.display.set_caption("Puzzle Creator")
 
         # Font to be used
         self.font1 = pygame.font.SysFont("comicsans", 40)
@@ -254,11 +275,11 @@ class GUI_Manager:
                                     (self.HEIGHT - self.Board_HEIGHT - self.font1.size(txt)[1]) / 2))
 
     def draw_done(self):
-        txt = "Here is your Unique Puzzle.."
-        loading_txt = self.font1.render(txt, True, (0, 0, 0))
+        txt = "Here is your Unique Puzzle.. Press Enter to Solve"
+        loading_txt = self.font2.render(txt, True, (255, 0, 100))
         self.WIN.blit(loading_txt, (0,
                                     self.Board_HEIGHT +
-                                    (self.HEIGHT - self.Board_HEIGHT - self.font1.size(txt)[1]) / 2))
+                                    (self.HEIGHT - self.Board_HEIGHT - self.font2.size(txt)[1]) / 2))
 
     def draw_press_space(self):
         txt = "You can press SPACE anytime to stop.."
@@ -379,6 +400,54 @@ class GUI_Manager:
                     y = i * self.Board_HEIGHT / self.size + (self.Board_HEIGHT / self.size - txt_size[1]) / 2
                     self.WIN.blit(label, (x, y))
 
+    def draw_values_3(self, vis):
+        for i in range(self.size):
+            for j in range(self.size):
+                if vis[i][j] == 1:
+                    label = self.font1.render(str(self.GUI_Board.rl_board.get_value(i, j)), True, (0, 0, 0))
+                    txt_size = self.font1.size(str(self.GUI_Board.rl_board.get_value(i, j)))
+                    x = j * self.Board_WIDTH / self.size + (self.Board_WIDTH / self.size - txt_size[0]) / 2
+                    y = i * self.Board_HEIGHT / self.size + (self.Board_HEIGHT / self.size - txt_size[1]) / 2
+                    cell_width = self.Board_WIDTH / self.size
+                    cell_height = self.Board_HEIGHT / self.size
+
+                    square = pygame.Surface((cell_width, cell_height))
+                    inside_rect = pygame.Rect(0, 0, cell_width, cell_height)
+
+                    square.fill((255, 255, 0), inside_rect)
+                    # square.fill((255, 0, 0), inside_rect)
+
+                    self.draw_board_lines()
+                    self.WIN.blit(square,
+                                  (j * self.Board_WIDTH / self.size + 1, i * self.Board_HEIGHT / self.size + 1))
+                    self.WIN.blit(label, (x, y))
+                elif vis[i][j] == 0 and self.GUI_Board.rl_board.get_value(i, j) != self.GUI_Board.rl_board.get_empty():
+                    label = self.font1.render(str(self.GUI_Board.rl_board.get_value(i, j)), True, (0, 0, 0))
+                    txt_size = self.font1.size(str(self.GUI_Board.rl_board.get_value(i, j)))
+                    x = j * self.Board_WIDTH / self.size + (self.Board_WIDTH / self.size - txt_size[0]) / 2
+                    y = i * self.Board_HEIGHT / self.size + (self.Board_HEIGHT / self.size - txt_size[1]) / 2
+                    cell_width = self.Board_WIDTH / self.size
+                    cell_height = self.Board_HEIGHT / self.size
+
+                    square = pygame.Surface((cell_width, cell_height))
+                    inside_rect = pygame.Rect(0, 0, cell_width, cell_height)
+
+                    # square.fill((255, 255, 0), inside_rect)
+                    square.fill((255, 0, 0), inside_rect)
+
+                    self.draw_board_lines()
+                    self.WIN.blit(square,
+                                  (j * self.Board_WIDTH / self.size + 1, i * self.Board_HEIGHT / self.size + 1))
+                    self.WIN.blit(label, (x, y))
+                elif vis[i][j] == 2:
+                    label = self.font1.render(str(self.GUI_Board.rl_board.get_value(i, j)), True, (0, 0, 0))
+                    txt_size = self.font1.size(str(self.GUI_Board.rl_board.get_value(i, j)))
+                    x = j * self.Board_WIDTH / self.size + (self.Board_WIDTH / self.size - txt_size[0]) / 2
+                    y = i * self.Board_HEIGHT / self.size + (self.Board_HEIGHT / self.size - txt_size[1]) / 2
+                    self.WIN.blit(label, (x, y))
+
+
+
     def draw_solved_values(self):
         # Draw values on board
         values = self.GUI_Solved_Board.get_values_render(self.font1)
@@ -493,6 +562,16 @@ class GUI_Manager:
             self.WIN.blit(lbl,
                           (i * self.Board_WIDTH / no_in_row + 5, self.Board_HEIGHT + self.font2.size(t[0])[1] + 20))
 
+    def solve_to_user(self):
+        sz = self.size
+        places = [i * sz + j for i in range(sz) for j in range(sz) if
+                  self.GUI_Board.rl_board.get_value(i, j) == self.GUI_Board.rl_board.get_empty()]
+        vis = [[2 for i in range(sz)] for j in range(sz)]
+        for p in places:
+            vis[p // sz][p % sz] = 0
+        places.reverse()
+        self.gui_solver.solve_board_show(self.GUI_Board.rl_board, places, self, vis, timeit.default_timer())
+
     def run_creator(self):
         # draw board with lines
         self.draw_full_board()
@@ -535,6 +614,8 @@ class GUI_Manager:
                 if even.type == pygame.KEYDOWN:
                     if even.key == pygame.K_ESCAPE:
                         Run = False
+                    elif even.key == pygame.K_RETURN:
+                        self.solve_to_user()
                 if even.type == pygame.QUIT:
                     Run = False
 
@@ -654,6 +735,57 @@ class GUI_Solver:
                 board.undo_move(row, col)
 
         board.undo_move(row, col)
+        places.append(cur)
+        return False
+
+    def solve_board_show(self, board, places, gui_manager, vis, st):
+        #if self.stop:
+        #    return 2
+
+        if len(places) == 0:
+            return True
+
+        cur = places[len(places) - 1]
+        row, col = int(cur / board.get_size()), cur % board.get_size()
+
+
+        vis[row][col] = 1
+
+        #time.sleep(5)
+
+        for even in pygame.event.get():
+            if even.type == pygame.KEYDOWN:
+                if even.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                elif even.key == pygame.K_SPACE:
+                    self.stop = True
+                    return 2
+            if even.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        places.pop()
+
+        moves = [i for i in range(1, 10)]
+        # shuffle(moves)
+
+        lst = 0
+        for move in moves:
+            time.sleep(.01)
+            board.make_move(row, col, move)
+            gui_manager.draw_board()
+            gui_manager.draw_values_3(vis)
+            gui_manager.draw_timer(st, timeit.default_timer())
+            pygame.display.flip()
+            if board.is_valid_move_2(row, col, move, vis):
+                lst = move
+                if self.solve_board_show(board, places, gui_manager, vis, st):
+                    return True
+
+        if lst != 0:
+            board.make_move(row, col, lst)
+        vis[row][col] = 0
         places.append(cur)
         return False
 
