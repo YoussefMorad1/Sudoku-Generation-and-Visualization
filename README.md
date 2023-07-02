@@ -1,4 +1,4 @@
-# Suduko Unique Puzzle Creator with Pygame
+# SudokuCraft: Interactive Puzzle Generation and Visualization
 
 * This is a GUI Program that uses BackTracking Algorithm to Create a unique (only one solution) Suduko Puzzle 
 * The Program has an option to solve the puzzle after it's created
